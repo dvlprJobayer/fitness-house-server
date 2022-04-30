@@ -37,6 +37,18 @@ async function run() {
             const result = await inventoryCollection.findOne(ObjectId(id));
             res.send(result);
         });
+
+        // Update Api
+        app.put('/inventory/:id', async (req, res) => {
+            const { id } = req.params;
+            const options = { upsert: true };
+            const filter = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: req.body
+            };
+            const result = await inventoryCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
     }
     finally {
 
