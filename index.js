@@ -29,7 +29,7 @@ async function run() {
         // Get Api
         app.get('/inventory', async (req, res) => {
             const cursor = inventoryCollection.find({});
-            const result = await cursor.toArray();
+            const result = await cursor.limit(6).toArray();
             res.send(result);
         });
         app.get('/inventory/:id', async (req, res) => {
