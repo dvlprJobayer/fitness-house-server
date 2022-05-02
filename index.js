@@ -32,6 +32,11 @@ async function run() {
             const result = await cursor.limit(6).toArray();
             res.send(result);
         });
+        app.get('/inventories', async (req, res) => {
+            const cursor = inventoryCollection.find({});
+            const result = await cursor.toArray();
+            res.send(result);
+        });
         app.get('/inventory/:id', async (req, res) => {
             const { id } = req.params;
             const result = await inventoryCollection.findOne(ObjectId(id));
