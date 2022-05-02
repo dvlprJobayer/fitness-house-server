@@ -54,6 +54,14 @@ async function run() {
             const result = await inventoryCollection.updateOne(filter, updateDoc, options);
             res.send(result);
         });
+
+        // Delete Api
+        app.delete('/inventory/:id', async (req, res) => {
+            const { id } = req.params;
+            const query = { _id: ObjectId(id) };
+            const result = await inventoryCollection.deleteOne(query);
+            res.send(result);
+        });
     }
     finally {
 
