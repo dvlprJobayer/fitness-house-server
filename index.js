@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -10,6 +11,20 @@ const app = express();
 // MiddleWare
 app.use(cors());
 app.use(express.json());
+
+const verifyJWT = (req, res, next) => {
+    if (!req.headers.auth) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+    const token = req.headers.auth.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ message: 'forbidden access' });
+        }
+        req.decoded = decoded;
+        next();
+    });
+}
 
 // Database
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4ueyb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -24,6 +39,12 @@ async function run() {
         app.post('/add-item', async (req, res) => {
             const result = await inventoryCollection.insertOne(req.body);
             res.send(result);
+        });
+        app.post('/get-token', async (req, res) => {
+            const token = jwt.sign(req.body, process.env.ACCESS_TOKEN, {
+                expiresIn: '1d'
+            });
+            res.send({ token });
         });
 
         // Get Api
@@ -41,6 +62,17 @@ async function run() {
             const { id } = req.params;
             const result = await inventoryCollection.findOne(ObjectId(id));
             res.send(result);
+        });
+        app.get('/my-items', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const { email } = req.query;
+            if (decodedEmail === email) {
+                const cursor = inventoryCollection.find({ email });
+                const result = await cursor.toArray();
+                res.send(result);
+            } else {
+                res.status(403).send({ message: 'forbidden access' });
+            }
         });
 
         // Update Api
