@@ -75,6 +75,12 @@ async function run() {
             }
         });
 
+        app.get('/inventory/my-items', async (req, res) => {
+            const cursor = inventoryCollection.find({});
+            const result = cursor.toArray();
+            res.send(result);
+        });
+
         // Update Api
         app.put('/inventory/:id', async (req, res) => {
             const { id } = req.params;
